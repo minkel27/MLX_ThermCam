@@ -1,3 +1,10 @@
+"""
+## This codes purpose is for the MLX 90640 Thermal camera
+* the process
+    - MLX takes data and the microcontroller (pico w) and sends the picture as arrays to the serial port
+    - then the next code analyzes it (importSerialData.py)
+    - working on combining these two now after successful heat map
+"""
 import board
 import digitalio
 import time
@@ -30,7 +37,7 @@ while True:
     for h in range(24):
         for w in range(32):
             t = frame[h * 32 + w]
-            print(f"{t:0.1f}, ", end="")
+            print(f"{t:0.1f}, ", end="*")
         print()
     print()
     time.sleep(1)  # Delay between readings
