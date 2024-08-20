@@ -5,42 +5,79 @@
     - then the next code analyzes it (importSerialData.py)
     - working on combining these two now after successful heat map
 """
-import board
-import digitalio
 import time
-import busio  # Import I2C busio
+import board
+import busio
+import adafruit_mlx90640
 
-#Custom library for the MLX
-from adafruit_mlx90640 import adafruit_mlx90640
+print(dir(board))
 
-#LED
-led = digitalio.DigitalInOut(board.LED)
-led.direction = digitalio.Direction.OUTPUT
+SCL = board.GP11
+SDA = board.GP10
 
-# Initialize I2C
-i2c = busio.I2C(scl=board.GP15, sda=board.GP14)
+i2c = busio.I2C(SCL, SDA, frequency=800000)
 
-# Initialize the MLX90640 sensor
 mlx = adafruit_mlx90640.MLX90640(i2c)
+print("MLX addr detected on I2C", [hex(i) for i in mlx.serial_number])
+
+# if using higher refresh rates yields a 'too many retries' exception,
+# try decreasing this value to work with certain pi/camera combinations
 mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_2_HZ
 
-frame = [0] * 768 
-
+frame = [0] * 768
 while True:
     try:
-        mlx.get_frame(frame)
+        mlx.getFrame(frame)
     except ValueError:
-        # Retry if there's a ValueError
+        # these happen, no biggie - retry
         continue
 
-    # Print out the temperature data
     for h in range(24):
         for w in range(32):
-            t = frame[h * 32 + w]
-            print(f"{t:0.1f}, ", end="*")
+            t = frame[h*32 + w]
+            print("%0.1f, " % t, end="")
         print()
     print()
-    time.sleep(1)  # Delay between readings
+
+
+# import board
+# import digitalio
+# import time
+# import busio  # Import I2C busio
+
+# #Custom library for the MLX
+# from adafruit_mlx90640 import adafruit_mlx90640
+
+# #LED
+# led = digitalio.DigitalInOut(board.LED)
+# led.direction = digitalio.Direction.OUTPUT
+
+# # Initialize I2C
+# SCL = board.GP11
+# SDA = board.GP10
+# i2c = busio.I2C(SCL, SDA)
+
+# # Initialize the MLX90640 sensor
+# mlx = adafruit_mlx90640.MLX90640(i2c)
+# mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_30_HZ
+
+# frame = [0] * 768 
+
+# while True:
+#     try:
+#         mlx.get_frame(frame)
+#     except ValueError:
+#         # Retry if there's a ValueError
+#         continue
+
+#     # Print out the temperature data
+#     for h in range(24):
+#         for w in range(32):
+#             t = frame[h * 32 + w]
+#             print(f"{t:0.1f}, ", end="*")
+#         print()
+#     print()
+#     time.sleep(1)  # Delay between readings
 
 ## simulating GPIO pins
 # #The state of pins
