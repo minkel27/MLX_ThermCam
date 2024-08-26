@@ -51,6 +51,6 @@ def update_heatmap(*args):
     heatmap.set_array(temps.reshape((24, 32)))
     return heatmap,
 
-ani = animation.FuncAnimation(fig, update_heatmap, interval=62.5)
+ani = animation.FuncAnimation(fig, update_heatmap, interval=125) #16 mhz in ms is 62.5
 
 plt.show()
