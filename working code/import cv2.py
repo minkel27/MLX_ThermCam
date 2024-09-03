@@ -16,12 +16,14 @@ temps = np.zeros((24, 32), dtype=np.float32)
 
 # Color maps and  custom
 # Define the colors in BGR format (as OpenCV uses BGR, not RGB)
+""" not needed right now because colormap_jet has a good enough range
 colors = [
     (0, 0, 0),      # Black
     (0, 0, 255),    # Red
     (0, 127, 255),  # Orange
     (0, 255, 255)   # Yellow
 ]
+"""
 colormap = cv2.COLORMAP_HOT  # You can experiment with other OpenCV colormaps
 # print(cv2.COLORMAP_JET)
 

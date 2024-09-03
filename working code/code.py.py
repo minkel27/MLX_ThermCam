@@ -39,7 +39,7 @@ while True:
         print()
     print()
 
-
+## this is all outdated
 # import board
 # import digitalio
 # import time
