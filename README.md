@@ -14,9 +14,8 @@
 
 
 Valuable links/tutorials/different paths
-- [PThermalCam with PI4+]([[https://pypi.org/project/pithermalcam/]])
-- [Pi Server for mlx in C+]([url](https://github.com/Samox1/ESP_Thermal_Camera_WebServer))
-- OpenCV documentation
-- [tutorial]([url](https://makersportal.com/blog/2020/6/8/high-resolution-thermal-camera-with-raspberry-pi-and-mlx90640))
-- [I2c with pi zero]([url](https://maxbotix.com/blogs/blog/setup-raspberry-pi-zero-for-i2c-sensor?srsltid=AfmBOoqUTfzDqjKhgLzmXYsK0Dl4vK7O5eg-BZ37kyQU6nLxgZZl5ZEw))
-- 
+- [PThermalCam with PI4+](https://pypi.org/project/pithermalcam/)
+- [Pi Server for mlx in C+](https://github.com/Samox1/ESP_Thermal_Camera_WebServer)
+- [OpenCV documentation](https://docs.opencv.org/)
+- [Tutorial](https://makersportal.com/blog/2020/6/8/high-resolution-thermal-camera-with-raspberry-pi-and-mlx90640)
+- [I2C with Pi Zero](https://maxbotix.com/blogs/blog/setup-raspberry-pi-zero-for-i2c-sensor?srsltid=AfmBOoqUTfzDqjKhgLzmXYsK0Dl4vK7O5eg-BZ37kyQU6nLxgZZl5ZEw)
