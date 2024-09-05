@@ -3,6 +3,7 @@
 - Code based around the MLX 90640
 
 # HOW TO START
+Pre: go to working code and choose "StartHere"
 1. ssh into the pi with "ssh pi@name" where you replace the name with the name of the pi or ip address
 2. open the virtual enviornment with "source myenv/bin/activate"
 3. run the code with "python code.py"
