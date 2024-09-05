@@ -1,11 +1,18 @@
 # Overview
 ### Summary
 - Code based around the MLX 90640
+
+# HOW TO START
+Pre: go to working code and choose "StartHere"
+1. ssh into the pi with "ssh pi@name" where you replace the name with the name of the pi or ip address
+2. open the virtual enviornment with "source myenv/bin/activate"
+3. run the code with "python code.py"
+     - For troubleshooting ensure you have all the packages for each specific import based on the code portion you are using
+
   - PI PICO: Code.py.py and importcv
     ---
     - Pico captures and sends arrays to your computer via serial communication (code.py.py)
     - importcv dispalys it on your computer
-   
   - PI Zero:
       ---
     - Same but displays in its terminal and was in progress to livestream the image to a flask website 
