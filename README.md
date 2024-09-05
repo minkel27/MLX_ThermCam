@@ -1,6 +1,7 @@
 # Overview
 ### Summary
 - Code based around the MLX 90640
+- Possible usages include visaulizing temps, enusring ovens reach a set goal, analyzing efficency of heat generators, checking temperatures.
 
 # HOW TO START
 Pre: go to working code and choose "StartHere"
