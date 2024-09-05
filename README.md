@@ -18,7 +18,7 @@ Pre: go to working code and choose "StartHere"
       ---
     - Same but displays in its terminal and was in progress to livestream the image to a flask website 
 
-
+Getframe error eems to actually be from the buffersize from one of the pixels having an error and rewriting, try increasing the buffer if this persist.
 
 
 Valuable links/tutorials/different paths
