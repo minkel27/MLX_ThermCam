@@ -1,0 +1,524 @@
+"""
+This codes purpose is for the MLX 90640 Thermal camera to capture and visualize data
+
+Background info: There are two paths for this, 
+* The main path is For the pi zero 2 and it displays the mlx camera readings in an array in its terminal
+* The second path is for the pi pico and has two code sets, one for the microcontroller 
+and one for the serial communications and displaying of the graph
+
+This has a collection of all the code; in order (you can ctrl f these phrases to find them easier)
+1. Pi Zero current code (completley working, in progress to advance)
+2. Pi Zero 2.0 (experiment to move forward with)
+3. Pi Pico serial (working half to pi pico) 
+4. Pi Pico Firmware (working half for pi pico device)
+5. Matplotlib (needs work but can work on a pico)
+6/7. useless now (inital prototyped code)
+
+"""
+##1/Pi Zero current code
+import time
+import smbus2
+import adafruit_mlx90640
+
+# Initialize the I2C bus
+i2c_bus = smbus2.SMBus(1)  # 1 indicates /dev/i2c-1 on the Raspberry Pi
+
+# Initialize the MLX90640 sensor
+mlx = adafruit_mlx90640.MLX90640(i2c_bus)
+print("MLX addr detected on I2C", [hex(i) for i in mlx.serial_number])
+
+# Set the refresh rate
+mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_2_HZ
+
+# Prepare the frame buffer
+frame = [0] * 768
+
+while True:
+    try:
+        mlx.getFrame(frame)
+    except ValueError:
+        # Handle the occasional ValueError by retrying
+        continue
+
+    # Print the temperature data
+    for h in range(24):
+        for w in range(32):
+            t = frame[h*32 + w]
+            print("%0.1f, " % t, end="")
+        print()
+    print()
+
+##-------------------------------------------------------------------------------------
+
+##2/Pi Zero 2.0
+# import time
+# import board
+# import busio
+# import adafruit_mlx90640
+# import numpy as np
+# from SimpleCV import Image, Display, ColorMap
+
+# # Initialize I2C for the MLX90640 thermal camera
+# i2c = busio.I2C(board.SCL, board.SDA, frequency=800000)
+# mlx = adafruit_mlx90640.MLX90640(i2c)
+
+# print("MLX addr detected on I2C", [hex(i) for i in mlx.serial_number])
+
+# # Set the refresh rate for the thermal camera
+# mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_2_HZ
+
+# # Initialize an array to store thermal data
+# frame = [0] * 768
+# temps = np.zeros((24, 32), dtype=np.float32)
+
+# # Initialize SimpleCV display
+# display = Display((960, 720))
+
+# def update_heatmap():
+#     try:
+#         mlx.getFrame(frame)
+#     except ValueError:
+#         # Handle retry if needed
+#         return
+
+#     # Populate temps array with thermal data
+#     for h in range(24):
+#         for w in range(32):
+#             temps[h, w] = frame[h * 32 + w]
+
+#     # Normalize temps array to the range [0, 255]
+#     normalized_temps = np.interp(temps, (temps.min(), temps.max()), (0, 255))
+
+#     # Convert to 8-bit unsigned integer format
+#     normalized_temps = normalized_temps.astype(np.uint8)
+
+#     # Convert to SimpleCV Image and apply a colormap
+#     thermal_image = Image(normalized_temps).applyColorMap(ColorMap.HOT)
+
+#     # Resize to desired window size
+#     thermal_image = thermal_image.scale(960, 720)
+
+#     # Display the image
+#     thermal_image.save(display)
+
+# def main():
+#     while display.isNotDone():
+#         update_heatmap()
+#         time.sleep(0.5)  # Adjust the sleep duration to match the camera's refresh rate
+
+# if __name__ == "__main__":
+#     main()
+
+#divider
+#---------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------
+"""
+This code is for the serial monitoring and is part of the pi pico code
+"""
+##3/Pi pico serial
+# import cv2
+# import time
+# import serial
+# import numpy as np
+
+# # Serial port configuration
+# serial_port = 'COM21'
+# baud_rate = 115200
+
+# # Initialize serial port
+# ser = serial.Serial(serial_port, baud_rate, timeout=1)
+# ser.flush()
+
+# # Initialize temperature array
+# temps = np.zeros((24, 32), dtype=np.float32)
+
+# # Color maps and  custom
+# # Define the colors in BGR format (as OpenCV uses BGR, not RGB)
+#  not needed right now because colormap_jet has a good enough range
+# colors = [
+#     (0, 0, 0),      # Black
+#     (0, 0, 255),    # Red
+#     (0, 127, 255),  # Orange
+#     (0, 255, 255)   # Yellow
+# ]
+# colormap = cv2.COLORMAP_HOT  # You can experiment with other OpenCV colormaps
+# # print(cv2.COLORMAP_JET)
+
+# def read_serial_data():
+#     if ser.in_waiting > 5000:#in bytes
+#         line = ser.read_until(b"*")
+#         split_string = line.decode().strip().split(',')
+
+#         for q in range(768):
+#             try:
+#                 value = float(split_string[q])
+#                 if value < 30:
+#                     value = 30
+#                 temps.flat[q] = value
+#             except (ValueError, IndexError):
+#                 temps.flat[q] = 0
+
+# def update_heatmap():
+#     read_serial_data()
+
+#     # Normalize temps array to the range [0, 255] for OpenCV color mapping
+#     normalized_temps = cv2.normalize(temps, None, 0, 255, cv2.NORM_MINMAX)
+
+#     # Convert to 8-bit unsigned integer format for color mapping
+#     normalized_temps = np.uint8(normalized_temps)
+
+#     # Apply the colormap
+#     colored_map = cv2.applyColorMap(normalized_temps, colormap)
+
+#     # Resize to desired window size
+#     resized_map = cv2.resize(colored_map, (960, 720), interpolation=cv2.INTER_NEAREST)
+
+#     # Display the image
+#     cv2.imshow(
+#         'Heatmap Display', 
+#         resized_map,
+#         # colored_map
+#     )
+
+# def main():
+    
+#     while True:
+#         time.sleep(0.1)
+#         start = time.time()
+#         # read_serial_data()
+#         update_heatmap()
+#         end = time.time()
+#         # print(f"{temps}")
+#         print(f"Here is the diff: {end-start}")
+#         if cv2.waitKey(1) & 0xFF == ord('q'):  # Exit when 'q' is pressed
+#             break
+
+#     ser.close()
+#     cv2.destroyAllWindows()
+
+# if __name__ == "__main__":
+#     main()
+
+
+
+#divider-----------------------------------------------------------------------------------------------------
+
+"""
+## This codes purpose is for the MLX 90640 Thermal camera
+* the process
+    - MLX takes data and the microcontroller (pico w) and sends the picture as arrays to the serial port
+    - then the next code analyzes it (importSerialData.py)
+    - working on combining these two now after successful heat map
+"""
+##4/Pi Pico Firmware
+# import time
+# import board
+# import busio
+# import adafruit_mlx90640
+
+# print(dir(board))
+
+# SCL = board.GP11
+# SDA = board.GP10
+
+# i2c = busio.I2C(SCL, SDA, frequency=800000)
+
+# mlx = adafruit_mlx90640.MLX90640(i2c)
+# print("MLX addr detected on I2C", [hex(i) for i in mlx.serial_number])
+
+# # if using higher refresh rates yields a 'too many retries' exception,
+# # try decreasing this value to work with certain pi/camera combinations
+# mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_2_HZ
+
+# frame = [0] * 768
+# while True:
+#     try:
+#         mlx.getFrame(frame)
+#     except ValueError:
+#         # these happen, no biggie - retry
+#         continue
+
+#     for h in range(24):
+#         for w in range(32):
+#             t = frame[h*32 + w]
+#             print("%0.1f, " % t, end="")
+#         print()
+#     print()
+
+
+
+## divider -----------------------------------------------------------------------------------------------
+"""
+This code is for the serial monitoring and needs to be adapted for this application
+
+##5/Matplotlib
+import cv2
+import time
+import serial
+import numpy as np
+
+# Serial port configuration
+serial_port = 'COM21'
+baud_rate = 115200
+
+# Initialize serial port
+ser = serial.Serial(serial_port, baud_rate, timeout=1)
+ser.flush()
+
+# Initialize temperature array
+temps = np.zeros((24, 32), dtype=np.float32)
+
+# Color maps and  custom
+# Define the colors in BGR format (as OpenCV uses BGR, not RGB)
+ not needed right now because colormap_jet has a good enough range
+colors = [
+    (0, 0, 0),      # Black
+    (0, 0, 255),    # Red
+    (0, 127, 255),  # Orange
+    (0, 255, 255)   # Yellow
+]
+colormap = cv2.COLORMAP_HOT  # You can experiment with other OpenCV colormaps
+# print(cv2.COLORMAP_JET)
+
+def read_serial_data():
+    if ser.in_waiting > 5000:#in bytes
+        line = ser.read_until(b"*")
+        split_string = line.decode().strip().split(',')
+
+        for q in range(768):
+            try:
+                value = float(split_string[q])
+                if value < 30:
+                    value = 30
+                temps.flat[q] = value
+            except (ValueError, IndexError):
+                temps.flat[q] = 0
+
+def update_heatmap():
+    read_serial_data()
+
+    # Normalize temps array to the range [0, 255] for OpenCV color mapping
+    normalized_temps = cv2.normalize(temps, None, 0, 255, cv2.NORM_MINMAX)
+
+    # Convert to 8-bit unsigned integer format for color mapping
+    normalized_temps = np.uint8(normalized_temps)
+
+    # Apply the colormap
+    colored_map = cv2.applyColorMap(normalized_temps, colormap)
+
+    # Resize to desired window size
+    resized_map = cv2.resize(colored_map, (960, 720), interpolation=cv2.INTER_NEAREST)
+
+    # Display the image
+    cv2.imshow(
+        'Heatmap Display', 
+        resized_map,
+        # colored_map
+    )
+
+def main():
+    
+    while True:
+        time.sleep(0.1)
+        start = time.time()
+        # read_serial_data()
+        update_heatmap()
+        end = time.time()
+        # print(f"{temps}")
+        print(f"Here is the diff: {end-start}")
+        if cv2.waitKey(1) & 0xFF == ord('q'):  # Exit when 'q' is pressed
+            break
+
+    ser.close()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
+
+"""
+
+
+#divider-----------------------------------------------------------------------------------------------------
+
+"""This is outdated/usless now"""
+# import board
+# import digitalio
+# import time
+# import busio  # Import I2C busio
+
+# #Custom library for the MLX
+# from adafruit_mlx90640 import adafruit_mlx90640
+
+# #LED
+# led = digitalio.DigitalInOut(board.LED)
+# led.direction = digitalio.Direction.OUTPUT
+
+# # Initialize I2C
+# SCL = board.GP11
+# SDA = board.GP10
+# i2c = busio.I2C(SCL, SDA)
+
+# # Initialize the MLX90640 sensor
+# mlx = adafruit_mlx90640.MLX90640(i2c)
+# mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_30_HZ
+
+# frame = [0] * 768 
+
+# while True:
+#     try:
+#         mlx.get_frame(frame)
+#     except ValueError:
+#         # Retry if there's a ValueError
+#         continue
+
+#     # Print out the temperature data
+#     for h in range(24):
+#         for w in range(32):
+#             t = frame[h * 32 + w]
+#             print(f"{t:0.1f}, ", end="*")
+#         print()
+#     print()
+#     time.sleep(1)  # Delay between readings
+
+## simulating GPIO pins
+# #The state of pins
+# class Micropython_GPIO:
+#     def __init__(self, pin_obj: digitalio.DigitalInOut, state = 'OUT'):
+#         self.pin = pin_obj
+#         self.set_INOUT(state)
+
+#     def set_INOUT(self, state):
+#         if state == 'IN':
+#             self.pin.direction = digitalio.Direction.INPUT
+#         elif state == 'OUT':
+#             self.pin.direction = digitalio.Direction.OUTPUT
+
+#     def high(self):
+#         self.pin.value = True
+
+#     def low(self):
+#         self.pin.value = False
+    
+#     def value(self):
+#         return self.pin.value
+    
+
+# def gpio_init(pin_num):
+#     circuitpy_gpio = digitalio.DigitalInOut(getattr(board, f'GP{pin_num}'))
+#     print(f'circutpy_gpio: {circuitpy_gpio}')
+#     return Micropython_GPIO(circuitpy_gpio)
+
+# #%%
+# gpio_pins = {
+#     pin_num: gpio_init(pin_num)
+#     for pin_num in range(29)
+#     if not pin_num in [23, 24, 25]
+# }
+
+# # initialize gpio to use
+# MLX1_SCL = gpio_pins[0]
+# MLX1_SDA = gpio_pins[1]
+
+# # configure gpio to use
+# MLX1_SCL.set_INOUT('OUT')
+# MLX1_SDA.set_INOUT('OUT')
+
+
+"""
+This is outdated
+"""
+
+# import board
+# import digitalio
+# import time
+# import busio  # Import I2C busio
+
+# #Custom library for the MLX
+# from adafruit_mlx90640 import adafruit_mlx90640
+
+# #LED
+# led = digitalio.DigitalInOut(board.LED)
+# led.direction = digitalio.Direction.OUTPUT
+
+# # Initialize I2C
+# SCL = board.GP11
+# SDA = board.GP10
+# i2c = busio.I2C(SCL, SDA)
+
+# # Initialize the MLX90640 sensor
+# mlx = adafruit_mlx90640.MLX90640(i2c)
+# mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_30_HZ
+
+# frame = [0] * 768 
+
+# while True:
+#     try:
+#         mlx.get_frame(frame)
+#     except ValueError:
+#         # Retry if there's a ValueError
+#         continue
+
+#     # Print out the temperature data
+#     for h in range(24):
+#         for w in range(32):
+#             t = frame[h * 32 + w]
+#             print(f"{t:0.1f}, ", end="*")
+#         print()
+#     print()
+#     time.sleep(1)  # Delay between readings
+
+## simulating GPIO pins
+# #The state of pins
+# class Micropython_GPIO:
+#     def __init__(self, pin_obj: digitalio.DigitalInOut, state = 'OUT'):
+#         self.pin = pin_obj
+#         self.set_INOUT(state)
+
+#     def set_INOUT(self, state):
+#         if state == 'IN':
+#             self.pin.direction = digitalio.Direction.INPUT
+#         elif state == 'OUT':
+#             self.pin.direction = digitalio.Direction.OUTPUT
+
+#     def high(self):
+#         self.pin.value = True
+
+#     def low(self):
+#         self.pin.value = False
+    
+#     def value(self):
+#         return self.pin.value
+    
+
+# def gpio_init(pin_num):
+#     circuitpy_gpio = digitalio.DigitalInOut(getattr(board, f'GP{pin_num}'))
+#     print(f'circutpy_gpio: {circuitpy_gpio}')
+#     return Micropython_GPIO(circuitpy_gpio)
+
+# #%%
+# gpio_pins = {
+#     pin_num: gpio_init(pin_num)
+#     for pin_num in range(29)
+#     if not pin_num in [23, 24, 25]
+# }
+
+# # initialize gpio to use
+# MLX1_SCL = gpio_pins[0]
+# MLX1_SDA = gpio_pins[1]
+
+# # configure gpio to use
+# MLX1_SCL.set_INOUT('OUT')
+# MLX1_SDA.set_INOUT('OUT')
+# while True:
+#     try:
+#         mlx.getFrame(frame)
+#     except ValueError:
+#         # these happen, no biggie - retry
+#         continue
+
+#     for h in range(24):
+#         for w in range(32):
+#             t = frame[h*32 + w]
+#             print("%0.1f, " % t, end="")
+#         print()
+#     print()
