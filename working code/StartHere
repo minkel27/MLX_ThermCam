@@ -13,34 +13,33 @@ This has a collection of all the code; in order (you can ctrl f these phrases to
 4. Pi Pico Firmware (working half for pi pico device)
 5. Matplotlib (needs work but can work on a pico)
 6/7. useless now (inital prototyped code)
-
 """
+
 ##1/Pi Zero current code
 import time
-import smbus2
+import board
+import busio
 import adafruit_mlx90640
 
-# Initialize the I2C bus
-i2c_bus = smbus2.SMBus(1)  # 1 indicates /dev/i2c-1 on the Raspberry Pi
+print(dir(board))
 
-# Initialize the MLX90640 sensor
-mlx = adafruit_mlx90640.MLX90640(i2c_bus)
+i2c = busio.I2C(board.SCL, board.SDA, frequency=800000)
+
+mlx = adafruit_mlx90640.MLX90640(i2c)
 print("MLX addr detected on I2C", [hex(i) for i in mlx.serial_number])
 
-# Set the refresh rate
+# if using higher refresh rates yields a 'too many retries' exception,
+# try decreasing this value to work with certain pi/camera combinations
 mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_2_HZ
 
-# Prepare the frame buffer
 frame = [0] * 768
-
 while True:
     try:
         mlx.getFrame(frame)
     except ValueError:
-        # Handle the occasional ValueError by retrying
+        # these happen, no biggie - retry
         continue
 
-    # Print the temperature data
     for h in range(24):
         for w in range(32):
             t = frame[h*32 + w]
